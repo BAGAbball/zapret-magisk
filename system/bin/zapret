@@ -77,14 +77,20 @@ if [ "$1" == "start" ]; then
     }
     use_iptables=$(check_iptables_support)
 
-    echo "Starting zapret..."; 
+   echo "Starting zapret..."; 
     hostlist="--hostlist-auto=/data/adb/zapret/DPI_list.txt --hostlist-exclude=/data/adb/zapret/DPI_ignore.txt";
-    config="--filter-tcp=80 --dpi-desync=fake,fakedsplit --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig $hostlist --new";
-    config="$config --filter-tcp=443 --hostlist=/etc/youtube.txt --dpi-desync=fake,multidisorder --dpi-desync-split-pos=1,midsld --dpi-desync-repeats=11 --dpi-desync-fooling=md5sig --dpi-desync-fake-tls=/etc/tls_clienthello_www_google_com.bin --new";
-    config="$config --filter-tcp=443 --dpi-desync=fake,multidisorder --dpi-desync-split-pos=midsld --dpi-desync-repeats=6 --dpi-desync-fooling=badseq,md5sig $hostlist --new";
-    config="$config --filter-udp=443 --hostlist=/etc/youtube.txt --dpi-desync=fake --dpi-desync-repeats=11 --dpi-desync-fake-quic=/etc/quic_initial_www_google_com.bin --new";
+    config="--filter-tcp=80,443 --filter-udp=443,50000-50090";
+    config="$config --filter-tcp=443 --ipset=/etc/russia-youtube-rtmps.txt --dpi-desync=syndata --dpi-desync-fake-syndata=/etc/tls_clienthello_4.bin --dpi-desync-autottl --new";
+    config="$config --filter-udp=443 --hostlist=/etc/youtubeQ.txt --dpi-desync=fake,udplen --dpi-desync-udplen-increment=2 --dpi-desync-fake-quic=/etc/quic_3.bin --dpi-desync-cutoff=n3 --dpi-desync-repeats=2 --new";
+    config="$config --filter-tcp=443 --hostlist=/etc/youtube.txt --dpi-desync=multisplit --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=midsld+1 --new";
+    config="$config --filter-udp=443 --hostlist=/etc/discord.txt --dpi-desync=fake,udplen --dpi-desync-udplen-increment=5 --dpi-desync-udplen-pattern=0xDEADBEEF --dpi-desync-fake-quic=/etc/quic_2.bin --dpi-desync-repeats=7 --dpi-desync-cutoff=n2 --new";
     config="$config --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=11 $hostlist --new";
-    config="$config --filter-udp=50000-50099 --ipset=/etc/discord.txt --dpi-desync=fake --dpi-desync-repeats=6 --dpi-desync-any-protocol --dpi-desync-cutoff=n4";
+    config="$config --filter-udp=50000-50090 --dpi-desync=fake --dpi-desync-any-protocol --dpi-desync-cutoff=n3 --new";
+    config="$config --filter-tcp=443 --hostlist=/etc/youtubeGV.txt --dpi-desync=multisplit --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=midsld-1 --new";
+    config="$config --filter-udp=443 --dpi-desync=fake --dpi-desync-repeats=11 $hostlist --new";
+        config="$config --filter-tcp=80 --hostlist=/etc/other.txt --dpi-desync=fake,multisplit --dpi-desync-fooling=md5sig --dpi-desync-autottl --new";
+    config="$config --filter-tcp=443 --hostlist=/etc/other.txt --dpi-desync=fake,multisplit --dpi-desync-split-seqovl=1 --dpi-desync-split-pos=midsld-1 --dpi-desync-fooling=md5sig,badseq --dpi-desync-fake-tls=/etc/tls_clienthello_4.bin --dpi-desync-ttl=2 --new";
+    config="$config --filter-tcp=443 --hostlist=/etc/faceinsta.txt --dpi-desync=split2 --dpi-desync-split-seqovl=652 --dpi-desync-split-pos=2 --dpi-desync-split-seqovl-pattern=/etc/tls_clienthello_4.bin --new";
 
     sysctl net.netfilter.nf_conntrack_tcp_be_liberal=1 > /dev/null;
     cbOrig="-m connbytes --connbytes-dir=original --connbytes-mode=packets --connbytes 1:12 -m mark ! --mark 0x40000000/0x40000000";
